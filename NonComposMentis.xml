@@ -153,6 +153,11 @@
 					<EditBox name="$parentText" multiLine="true" letters="4000" autoFocus="false">
 						<Size x="343" y="194"/>
 						<FontString inherits="GameFontHighlightSmall"/>
+						<Scripts>
+							<OnEscapePressed>
+								this:ClearFocus();
+							</OnEscapePressed>
+						</Scripts>
 					</EditBox>
 				</ScrollChild>
 			</ScrollFrame>

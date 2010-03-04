@@ -98,12 +98,39 @@ function NCM.UpdateFrame()
 
 	-- update text here...
 
-	local txt = ""
-
+	local txt = "";
+	local indent = "    ";
 	local reps = NCM.GetReps();
 
-	for k, v in pairs(reps) do
-		txt = txt .. k .. ": " .. v .. "\n";
+
+	local rh = reps["Ravenholdt"] or 0;
+	local rh_remain = 42000 - rh;
+	if (rh_remain < 1) then
+
+		txt = txt .. "Ravenholdt: DONE!\n";
+	else
+		txt = txt .. "Ravenholdt\n";
+		txt = txt .. indent .. rh_remain .. "rep remaining\n";
+
+		-- can we still kill members?
+		if (rh < 21000) then
+			local rh_remain_kill = 21000 - rh;
+			local rh_kills = math.ceil(rh_remain_kill / 5);
+			txt = txt .. indent .. "Kills until Revered: " .. rh_kills .. "\n";
+		end
+
+		-- junk box turnins
+		local rh_boxes = math.ceil(rh_remain / 75) * 5;
+		txt = txt .. indent .. "Junk boxes to finish: " .. rh_boxes .. "\n";
+	end
+	
+
+	if (false) then
+		txt = txt .. "\n";
+
+		for k, v in pairs(reps) do
+			txt = txt .. k .. ": " .. v .. "\n";
+		end
 	end
 
 	_G.NCMFrameScrollFrameText:SetText(txt);
