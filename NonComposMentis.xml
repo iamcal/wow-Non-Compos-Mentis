@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
 
-	<Frame name="NCMFrame" parent="UIParent" movable="true" clampedToScreen="true" hidden="false" frameStrata="MEDIUM" toplevel="true">
+	<Frame name="NCMFrame" parent="UIParent" movable="true" resizable="true" clampedToScreen="true" hidden="false" frameStrata="MEDIUM" toplevel="true">
 		<Size x="200" y="200"/>
 		<Anchors>
 			<Anchor point="LEFT">
@@ -161,6 +161,72 @@
 					</EditBox>
 				</ScrollChild>
 			</ScrollFrame>
+
+			<Button name="$parentResize" enableMouse="true">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="0" y="3"/>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\AddOns\NonComposMentis\textures\ResizeGripRight" setAllPoints="true">
+							<Color r="1" g="1" b="0" a="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame:SetMinResize(100,100);
+						NCMFrame:SetMaxResize(400,400);
+					</OnLoad>
+					<OnMouseDown>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame.isResizing = true;
+						NCMFrame:StartSizing("BOTTOMRIGHT");
+					</OnMouseDown>
+					<OnMouseUp>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame:StopMovingOrSizing();
+						NCMFrame.isResizing = false;
+					</OnMouseUp>
+				</Scripts>
+			</Button>
+
+			<Button name="$parentResize" enableMouse="true">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset x="3" y="3"/>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\AddOns\NonComposMentis\textures\ResizeGripLeft" setAllPoints="true">
+							<Color r="1" g="1" b="0" a="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame:SetMinResize(100,100);
+						NCMFrame:SetMaxResize(400,400);
+					</OnLoad>
+					<OnMouseDown>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame.isResizing = true;
+						NCMFrame:StartSizing("BOTTOMLEFT");
+					</OnMouseDown>
+					<OnMouseUp>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame:StopMovingOrSizing();
+						NCMFrame.isResizing = false;
+					</OnMouseUp>
+				</Scripts>
+			</Button>
 
 		</Frames>		
 		<Scripts>
