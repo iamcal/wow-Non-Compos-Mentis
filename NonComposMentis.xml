@@ -1,0 +1,172 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+
+	<Frame name="NCMFrame" parent="UIParent" movable="true" clampedToScreen="true" hidden="false" frameStrata="MEDIUM" toplevel="true">
+		<Size x="200" y="200"/>
+		<Anchors>
+			<Anchor point="LEFT">
+				<Offset x="64" y="0"/>
+			</Anchor>
+		</Anchors>
+		<Layers>
+			<Layer level="BACKGROUND">
+
+				<!-- the background for the titlebar -->
+				<Texture name="$parentTitleBG" file="Interface\PaperDollInfoFrame\UI-GearManager-Title-Background">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="9" y="-6"/>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT">
+							<Offset x="-6" y="-24"/>
+						</Anchor>
+					</Anchors>
+				</Texture>
+
+				<!-- the background for the main window area -->
+				<Texture name="$parentDialogBG" file="Interface\Tooltips\UI-Tooltip-Background">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="8" y="-24"/>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset x="-6" y="8"/>
+						</Anchor>
+					</Anchors>
+					<Color r="0" g="0" b="0" a=".75"/>
+				</Texture>
+			</Layer>
+
+
+			<Layer level="BORDER">
+				<Texture name="$parentTopLeft" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.501953125" right="0.625" top="0" bottom="1"/>
+				</Texture>			
+				<Texture name="$parentTopRight" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="16" y="64"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.71875" right="0.75" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentTop" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="0" y="64"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="TOPRIGHT"/>
+						<Anchor point="TOPRIGHT" relativeTo="$parentTopRight" relativePoint="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.25" right="0.369140625" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottomLeft" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT"/>
+					</Anchors>
+					<TexCoords left="0.751953125" right="0.875" top="0" bottom="1"/>
+				</Texture>			
+				<Texture name="$parentBottomRight" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.875" right="1" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentBottom" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="0" y="64"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentBottomLeft" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+					<TexCoords left="0.376953125" right="0.498046875" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentLeft" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="64" y="0"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentTopLeft" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMLEFT" relativeTo="$parentBottomLeft" relativePoint="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0.001953125" right="0.125" top="0" bottom="1"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
+					<Size x="64" y="0"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeTo="$parentTopRight" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentBottomRight" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.1171875" right="0.2421875" top="0" bottom="1"/>
+				</Texture>
+
+			</Layer>
+
+			<Layer level="OVERLAY">
+				<FontString name="$parentTitle" inherits="GameFontNormal" text="Non Compos Mentis">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset x="12" y="-8"/>
+						</Anchor>
+						<Anchor point="TOPRIGHT">
+							<Offset x="-12" y="-8"/>
+						</Anchor>
+					</Anchors>
+				</FontString>					
+			</Layer>
+		</Layers>
+		<Frames>
+
+			<!-- the drag box that covers the title area -->
+			<Frame name="$parentTitleButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="$parentTitleBG"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$parentTitleBG"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton");
+					</OnLoad>
+					<OnDragStart>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame.moving = true;
+						NCMFrame:StartMoving();
+					</OnDragStart>
+					<OnDragStop>
+						local NCMFrame = _G["NCMFrame"];
+						NCMFrame.moving = nil;
+						NCMFrame:StopMovingOrSizing();
+					</OnDragStop>
+				</Scripts>
+			</Frame>
+
+			<ScrollFrame name="$parentScrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="12" y="-30"/>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-31" y="13"/>
+					</Anchor>
+				</Anchors>
+				<ScrollChild>
+					<EditBox name="$parentText" multiLine="true" letters="4000" autoFocus="false">
+						<Size x="343" y="194"/>
+						<FontString inherits="GameFontHighlightSmall"/>
+					</EditBox>
+				</ScrollChild>
+			</ScrollFrame>
+
+		</Frames>		
+		<Scripts>
+<!--
+			<OnLoad function="NCMFrame_OnLoad"/>
+			<OnEvent function="NCMFrame_OnEvent"/>
+			<OnUpdate function="NCMFrame_OnUpdate"/>
+			<OnKeyUp function="NCMFrame_OnKeyUp"/>
+-->
+			<!-- <OnSizeChanged function="NCMFrame_OnSizeChanged"/> Set in NCMFrame_OnLoad -->
+		</Scripts>
+	</Frame>
+	
+</Ui>

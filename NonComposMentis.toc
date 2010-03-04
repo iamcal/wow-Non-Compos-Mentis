@@ -6,3 +6,4 @@
 ## Dependencies: 
 ## SavedVariablesPerCharacter: NonComposMentisDB
 NonComposMentis.lua
+NonComposMentis.xml

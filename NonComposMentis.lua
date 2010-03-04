@@ -53,48 +53,9 @@ function NCM.OnEvent(frame, event, ...)
 	end
 end
 
-function NCM.OnDragStart(frame)
-	NCM.UIFrame:StartMoving();
-	NCM.UIFrame.isMoving = true;
-	--GameTooltip:Hide()
-end
-
-function NCM.OnDragStop(frame)
-	NCM.UIFrame:StopMovingOrSizing();
-	NCM.UIFrame.isMoving = false;
-end
-
 function NCM.StartFrame()
 
-	NCM.UIFrame = CreateFrame("Frame",nil,UIParent);
-	NCM.UIFrame:SetFrameStrata("BACKGROUND")
-	NCM.UIFrame:SetWidth(200)
-	NCM.UIFrame:SetHeight(200)
-
-	NCM.UIFrame.texture = NCM.UIFrame:CreateTexture()
-	NCM.UIFrame.texture:SetAllPoints(NCM.UIFrame)
-	NCM.UIFrame.texture:SetTexture(0, 0, 0)
-	
-
-	-- position the parent frame
-	local frameRef = "CENTER";
-	local frameX = 0;
-	local frameY = 0;
-	if (_G.NonComposMentisDB.opts.frameRef) then
-		frameRef	= _G.NonComposMentisDB.opts.frameRef;
-		frameX		= _G.NonComposMentisDB.opts.frameX;
-		frameY		= _G.NonComposMentisDB.opts.frameY;
-
-		NCM.UIFrame:SetWidth(_G.NonComposMentisDB.opts.frameW);
-	end
-	NCM.UIFrame:SetPoint(frameRef, frameX, frameY);
-
-	-- make it draggable
-	NCM.UIFrame:SetMovable(true);
-	NCM.UIFrame:EnableMouse(true);
-	NCM.UIFrame:SetScript("OnDragStart", NCM.OnDragStart);
-	NCM.UIFrame:SetScript("OnDragStop", NCM.OnDragStop);
-	NCM.UIFrame:RegisterForDrag("LeftButton");
+	NCM.UIFrame = _G["NCMFrame"];
 
 	NCM.UpdateFrame();
 
@@ -135,6 +96,49 @@ end
 
 function NCM.UpdateFrame()
 
+	-- update text here...
+
+	local txt = ""
+
+	local reps = NCM.GetReps();
+
+	for k, v in pairs(reps) do
+		txt = txt .. k .. ": " .. v .. "\n";
+	end
+
+	_G.NCMFrameScrollFrameText:SetText(txt);
+end
+
+function NCM.Test()
+
+	local reps = NCM.GetReps();
+
+	print(reps);
+	for k, v in pairs(reps) do
+		print(k, v)
+	end
+	print "--";
+end
+
+
+function NCM.GetReps()
+
+	local factionMap = {};
+	local factionIndex = 1
+	repeat
+		local name, description, standingId, bottomValue, topValue, earnedValue, atWarWith,
+		canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(factionIndex)
+
+		if name == nil then break end
+
+		if isHeader == nil then
+			factionMap[name] = earnedValue;
+		end
+
+		factionIndex = factionIndex + 1
+	until factionIndex > 200
+
+	return factionMap;
 end
 
 
@@ -150,6 +154,8 @@ function SlashCmdList.NONCOMPOSMENTIS(msg, editbox)
 		NCM.Toggle();
 	elseif (msg == 'reset') then
 		NCM.ResetPos();
+	elseif (msg == 'test') then
+		NCM.Test();
 	else
 		print "Non Compos Mentis commands:";
 		print "   /ncm show - Show frame";
