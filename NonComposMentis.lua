@@ -123,6 +123,13 @@ function NCM.UpdateFrame()
 	local indent = "    ";
 	local reps = NCM.GetReps();
 
+	local race = UnitRace("player");
+	local factor = 1;
+
+	if (race == 'Human') then
+		factor = 1.1;
+	end
+
 
 	--
 	-- Ravenholdt
@@ -140,12 +147,12 @@ function NCM.UpdateFrame()
 		-- can we still kill members?
 		if (rh < 21000) then
 			local rh_remain_kill = 21000 - rh;
-			local rh_kills = math.ceil(rh_remain_kill / 5);
+			local rh_kills = math.ceil(rh_remain_kill / (5 * factor));
 			txt = txt .. indent .. "Kills until Revered: " .. rh_kills .. "\n";
 		end
 
 		-- junk box turnins
-		local rh_boxes = math.ceil(rh_remain / 75) * 5;
+		local rh_boxes = math.ceil(rh_remain / (75 * factor)) * 5;
 		txt = txt .. indent .. "Junk boxes to finish: " .. rh_boxes .. "\n";
 	end
 	txt = txt .. "\n";
@@ -165,12 +172,12 @@ function NCM.UpdateFrame()
 		txt = txt .. indent .. NCM.FormatNumber(dmf_remain) .. " rep remaining\n";
 
 		if (dmf < 5000) then
-			local dmf_quests = math.ceil((5000 - dmf) / 250);
+			local dmf_quests = math.ceil((5000 - dmf) / (250 * factor));
 			txt = txt .. indent .. "Quests until maxed: " .. dmf_quests .. "\n";
 		end
 
-		local dmf_minor = math.ceil(dmf_remain / 25);
-		local dmf_major = math.ceil(dmf_remain / 350);
+		local dmf_minor = math.ceil(dmf_remain / (25 * factor));
+		local dmf_major = math.ceil(dmf_remain / (350 * factor));
 
 		txt = txt .. indent .. "Minor decks to finish: " .. dmf_minor .. "\n";
 		txt = txt .. indent .. "Major decks to finish: " .. dmf_major .. "\n";
@@ -209,7 +216,7 @@ function NCM.UpdateFrame()
 		txt = txt .. "Bloodsail Buccaneers\n";
 		txt = txt .. indent .. NCM.FormatNumber(bb_remain) .. " rep remaining\n";
 
-		local bb_bruisers = math.ceil(bb_remain / 25);
+		local bb_bruisers = math.ceil(bb_remain / (25 * factor));
 		txt = txt .. indent .. "Bruiser kills to finish: " .. bb_bruisers .. "\n";
 	end
 
