@@ -64,7 +64,7 @@ function NCM.OnEvent(frame, event, ...)
 	if (event == 'LOOT_CLOSED') then
 	end
 
-	if (event == 'PLAYER_ENTERING_WORLD') then
+	if (event == 'PLAYER_ALIVE') then
 		NCM.UpdateFrame();
 	end	
 
@@ -229,7 +229,7 @@ function NCM.UpdateFrame()
 			local rh_kills = math.ceil(rh_remain_kill / (5 * factor));
 			txt = txt .. indent .. "Kills until Revered: " .. rh_kills .. "\n";
 
-			if (NCM.GetSessionLength('Ravenholdt')) then
+			if (NCM.GetSessionLength('Ravenholdt') > 0) then
 				local len = NCM.GetSessionLength('Ravenholdt');
 				local delta = NCM.GetSessionDelta('Ravenholdt');
 
@@ -538,7 +538,7 @@ NCM.Frame:RegisterEvent("PLAYER_TARGET_CHANGED")
 NCM.Frame:RegisterEvent("LOOT_OPENED")
 NCM.Frame:RegisterEvent("LOOT_CLOSED")
 NCM.Frame:RegisterEvent("PLAYER_LOGOUT")
-NCM.Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+NCM.Frame:RegisterEvent("PLAYER_ALIVE")
 NCM.Frame:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 
 NCM.OnLoad()
