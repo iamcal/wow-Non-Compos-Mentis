@@ -1,0 +1,5 @@
+1.0
+ - first release
+
+1.1
+ - scale rep corrctly for humans
