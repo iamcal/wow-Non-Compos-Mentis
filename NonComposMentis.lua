@@ -1,10 +1,22 @@
 NCM = {}
 
-
 function NCM.OnLoad()
 
-	-- set up any config variables here
-	--NCM.foo = 'bar';
+	-- reputation values
+	NCM.reps_loaded = false;
+	NCM.prev_reps = {};
+
+	-- rep changes for this play session
+	NCM.has_session_data = false;
+	NCM.play_session = {};
+
+	-- farming sessions
+	NCM.farm_limit_max = 60 * 5; -- 5m
+	NCM.farm_limit_min = 10;
+	NCM.farm_session = nil;
+	NCM.farm_started = nil;
+	NCM.farm_last = nil;
+	NCM.farm_delta = nil;
 end
 
 function NCM.OnReady()
@@ -12,14 +24,14 @@ function NCM.OnReady()
 	-- init database
 	_G.NonComposMentisDB = _G.NonComposMentisDB or {};
 	_G.NonComposMentisDB.opts	= _G.NonComposMentisDB.opts or {};
-	--_G.NonComposMentisDB.kills	= _G.NonComposMentisDB.kills or {};
-	--_G.NonComposMentisDB.loots	= _G.NonComposMentisDB.loots or {};
-	--_G.NonComposMentisDB.times	= _G.NonComposMentisDB.times or {};
+	_G.NonComposMentisDB.farms	= _G.NonComposMentisDB.farms or {};
 
 	NCM.StartFrame();
 end
 
 function NCM.OnSaving()
+
+	NCM.EndSession();
 
 	local point, relativeTo, relativePoint, xOfs, yOfs = NCM.UIFrame:GetPoint()
 	_G.NonComposMentisDB.opts.frameRef = relativePoint;
@@ -59,6 +71,11 @@ function NCM.OnEvent(frame, event, ...)
 	if (event == 'CHAT_MSG_COMBAT_FACTION_CHANGE') then
 		NCM.UpdateFrame();
 	end
+end
+
+function NCM.OnUpdate()
+
+	NCM.TryEndSession()
 end
 
 function NCM.StartFrame()
@@ -117,11 +134,73 @@ end
 
 function NCM.UpdateFrame()
 
+	NCM.TryEndSession();
+
 	-- update text here...
 
 	local txt = "";
 	local indent = "    ";
 	local reps = NCM.GetReps();
+
+
+	--
+	-- did we get any reps at all?
+	--
+
+	local num_reps = 0;
+	for _,_ in pairs(reps) do
+		num_reps = num_reps + 1;
+	end
+
+	if (num_reps == 0) then
+		_G.NCMFrameScrollFrameText:SetText("Reputations not loaded...");
+		return
+	end
+
+
+	--
+	-- see what's changed since last update
+	--
+
+	local diffs = {};
+	local has_diffs = false;
+
+	if (NCM.reps_loaded) then
+
+
+		for k,v in pairs(reps) do
+
+			local old_v = NCM.prev_reps[k];
+			if (not (v == old_v)) then
+				diffs[k] = v - old_v;
+				has_diffs = true;
+
+				NCM.has_session_data = true;
+				NCM.play_session[k] = (NCM.play_session[k] or 0) + diffs[k];
+			end
+		end
+
+	else
+		NCM.reps_loaded = true;
+	end
+
+	NCM.prev_reps = reps;
+
+	if (diffs['Ravenholdt']) then NCM.IncrementSession('Ravenholdt', diffs['Ravenholdt']); end
+
+	if (NCM.has_session_data and false) then
+
+		txt = txt .. "Changes this session:\n";
+		for k,v in pairs(NCM.play_session) do
+			txt = txt .. indent .. k .. ": " .. v .. "\n";
+		end
+		txt = txt .. "\n";
+	end
+
+
+	--
+	-- bonuses for humans
+	--
 
 	local race = UnitRace("player");
 	local factor = 1;
@@ -149,6 +228,17 @@ function NCM.UpdateFrame()
 			local rh_remain_kill = 21000 - rh;
 			local rh_kills = math.ceil(rh_remain_kill / (5 * factor));
 			txt = txt .. indent .. "Kills until Revered: " .. rh_kills .. "\n";
+
+			if (NCM.GetSessionLength('Ravenholdt')) then
+				local len = NCM.GetSessionLength('Ravenholdt');
+				local delta = NCM.GetSessionDelta('Ravenholdt');
+
+				delta = math.floor(delta / (5 * factor));
+				local len_remain = (len / delta) * rh_kills;
+
+				txt = txt .. indent .. indent .. ""..delta.." in "..NCM.FormatTime(len, "0s").." => "
+					..NCM.FormatTime(len_remain, "0s").." remaining\n";
+			end
 		end
 
 		-- junk box turnins
@@ -233,7 +323,153 @@ function NCM.UpdateFrame()
 		end
 	end
 
+	if (false) then
+		txt = txt .. "\n";
+		txt = txt .. "NCM.farm_session: " .. (NCM.farm_session or "nil") .. "\n";
+		txt = txt .. "NCM.farm_started: " .. (NCM.farm_started or "nil") .. "\n";
+		txt = txt .. "NCM.farm_last: " .. (NCM.farm_last or "nil") .. "\n";
+		txt = txt .. "NCM.farm_delta: " .. (NCM.farm_delta or "nil") .. "\n";
+		txt = txt .. "\n";
+		for k, v in pairs(_G.NonComposMentisDB.farms) do
+			txt = txt .. k .. " = " .. v.delta .. " in " .. v.length .. "\n";
+		end
+	end
+
 	_G.NCMFrameScrollFrameText:SetText(txt);
+end
+
+---------------------------------------------------------------------------------------------
+--
+-- functions for farm session handling
+--
+
+function NCM.IncrementSession(name, delta)
+
+	-- in a different farm session?
+	if (NCM.farm_session and not (NCM.farm_session == name)) then
+
+		NCM.EndSession();
+	end
+
+	if (NCM.farm_session == name) then
+
+		NCM.farm_last = GetTime();
+		NCM.farm_delta = NCM.farm_delta + delta;
+	else
+
+		NCM.farm_session = name;
+		NCM.farm_started = GetTime();
+		NCM.farm_last = NCM.farm_started;
+		NCM.farm_delta = delta;
+	end
+end
+
+function NCM.GetSessionLength(name)
+
+	local x = 0;
+
+	if (_G.NonComposMentisDB.farms[name]) then
+
+		x = x + _G.NonComposMentisDB.farms[name].length;
+	end
+
+	if (NCM.farm_session == name) then
+
+		local t = GetTime() - NCM.farm_started;
+		if (t < NCM.farm_limit_min) then t = NCM.farm_limit_min; end
+
+		x = x + t;
+	end
+
+	return x;
+end
+
+function NCM.GetSessionDelta(name)
+
+	local x = 0;
+
+	if (_G.NonComposMentisDB.farms[name]) then
+
+		x = x + _G.NonComposMentisDB.farms[name].delta;
+	end
+
+	if (NCM.farm_session == name) then
+
+		x = x + NCM.farm_delta;
+	end
+
+	return x;
+end
+
+
+function NCM.TryEndSession()
+
+	-- see if the current session should be ended
+	-- because too long has passed since the last
+	-- event.
+
+	if (NCM.farm_session) then
+
+		local n = GetTime();
+		if (n - NCM.farm_last > NCM.farm_limit_max) then
+
+			NCM.EndSession();
+		end
+	end
+end
+
+function NCM.EndSession()
+
+	if (NCM.farm_session) then
+
+		local l = 0;
+		local d = 0;
+
+		if (_G.NonComposMentisDB.farms[NCM.farm_session]) then
+			l = l + _G.NonComposMentisDB.farms[NCM.farm_session].length;
+			d = d + _G.NonComposMentisDB.farms[NCM.farm_session].delta;
+		end
+
+		local this_time = NCM.farm_last - NCM.farm_started;
+		if (this_time < NCM.farm_limit_min) then this_time = NCM.farm_limit_min; end
+
+		l = l + this_time;
+		d = d + NCM.farm_delta;
+
+		_G.NonComposMentisDB.farms[NCM.farm_session] = { length = l, delta = d };
+	end
+
+	NCM.farm_session = nil;
+	NCM.farm_started = nil;
+	NCM.farm_last = nil;
+	NCM.farm_delta = nil;
+
+	NCM.UpdateFrame();
+end
+
+---------------------------------------------------------------------------------------------
+
+function NCM.FormatTime(t, zero)
+
+	if (t == 0) then
+		return zero;
+	end
+
+	local h = math.floor(t / (60 * 60));
+	t = t - (60 * 60 * h);
+	local m = math.floor(t / 60);
+	t = t - (60 * m);
+	local s = t;
+
+	if (h > 0) then
+		return string.format("%d:%02d:%02d", h, m, s);
+	end
+
+	if (m > 0) then
+		return string.format("%d:%02d", m, s);
+	end
+
+	return string.format("%d", s).."s";
 end
 
 function NCM.Test()
@@ -296,6 +532,7 @@ end
 NCM.Frame = CreateFrame("Frame")
 NCM.Frame:Show()
 NCM.Frame:SetScript("OnEvent", NCM.OnEvent)
+NCM.Frame:SetScript("OnUpdate", NCM.OnUpdate)
 NCM.Frame:RegisterEvent("ADDON_LOADED")
 NCM.Frame:RegisterEvent("PLAYER_TARGET_CHANGED")
 NCM.Frame:RegisterEvent("LOOT_OPENED")

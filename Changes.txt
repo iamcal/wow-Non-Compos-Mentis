@@ -2,4 +2,8 @@
  - first release
 
 1.1
- - scale rep corrctly for humans
+ - scale rep correctly for humans
+
+1.2
+ - start tracking farming session
+ - show how long left to kill required ravenholdt members
