@@ -132,6 +132,19 @@ function NCM.FormatNumber(n)
 	return s;
 end
 
+function NCM.FormatNumberShort(n)
+
+	local s = string.format("%d", n);
+
+	if (n > 999) then
+
+		local l = string.len(s);
+		return string.sub(s, 1, l - 3) .. 'k';
+	end
+
+	return s;
+end
+
 function NCM.UpdateFrame()
 
 	NCM.TryEndSession();
@@ -308,6 +321,45 @@ function NCM.UpdateFrame()
 
 		local bb_bruisers = math.ceil(bb_remain / (25 * factor));
 		txt = txt .. indent .. "Bruiser kills to finish: " .. bb_bruisers .. "\n";
+	end
+	txt = txt .. "\n";
+
+
+	--
+	-- Goblin Factions
+	--
+
+	local g1 = reps["Booty Bay"] or 0;
+	local g2 = reps["Everlook"] or 0;
+	local g3 = reps["Gadgetzan"] or 0;
+	local g4 = reps["Ratchet"] or 0;
+
+	local g1_remain = 42000 - g1;
+	local g2_remain = 42000 - g2;
+	local g3_remain = 42000 - g3;
+	local g4_remain = 42000 - g4;
+
+	local most_remain = 0;
+	if (g1_remain > most_remain) then most_remain = g1_remain; end
+	if (g2_remain > most_remain) then most_remain = g2_remain; end
+	if (g3_remain > most_remain) then most_remain = g3_remain; end
+	if (g4_remain > most_remain) then most_remain = g4_remain; end
+
+	if (most_remain < 1) then
+
+		txt = txt .. "Goblin Factions: DONE!\n";
+	else
+		txt = txt .. "Goblin Factions\n";
+		txt = txt .. indent .. NCM.FormatNumber(most_remain) .. " rep remaining\n";
+		txt = txt .. indent .. indent .. "(" .. NCM.FormatNumberShort(g1_remain) .. "/" .. NCM.FormatNumberShort(g2_remain) .. "/" 
+			.. NCM.FormatNumberShort(g3_remain) .. "/" .. NCM.FormatNumberShort(g4_remain) .. ")\n";
+
+		local g_knot = math.ceil(most_remain / (350 * factor));
+		local g_ogre = math.ceil(most_remain / (250 * factor));
+		
+		txt = txt .. indent .. "Free Knot turnins to finish: " .. g_knot .. "\n";
+		txt = txt .. indent .. "Orge Tannin turnins to finish: " .. g_ogre .. "\n";
+
 	end
 
 
