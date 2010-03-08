@@ -103,6 +103,14 @@ function NCM.Hide()
 	print("Non Compos Mentis: Hidden");
 end
 
+function NCM.HideButton()
+	_G.NonComposMentisDB.opts.hide = true;
+	NCM.UIFrame:Hide();
+	print("Non Compos Mentis: Hidden");
+	print("    Use \"/ncm show\" to show again");
+end
+
+
 function NCM.ResetPos()
 	NCM.Show();
 	NCM.UIFrame:SetWidth(150);

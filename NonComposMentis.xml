@@ -47,11 +47,11 @@
 					<TexCoords left="0.501953125" right="0.625" top="0" bottom="1"/>
 				</Texture>			
 				<Texture name="$parentTopRight" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
-					<Size x="16" y="64"/>
+					<Size x="64" y="64"/>
 					<Anchors>
 						<Anchor point="TOPRIGHT"/>
 					</Anchors>
-					<TexCoords left="0.71875" right="0.75" top="0" bottom="1"/>
+					<TexCoords left="0.625" right="0.75" top="0" bottom="1"/>
 				</Texture>
 				<Texture name="$parentTop" file="Interface\PaperDollInfoFrame\UI-GearManager-Border">
 					<Size x="0" y="64"/>
@@ -116,6 +116,26 @@
 			</Layer>
 		</Layers>
 		<Frames>
+
+			<!-- close button -->
+			<Button name="$parentCloseButton">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="2" y="1"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						NCM.HideButton();
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+			</Button>
 
 			<!-- the drag box that covers the title area -->
 			<Frame name="$parentTitleButton">
