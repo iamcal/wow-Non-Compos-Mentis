@@ -26,7 +26,27 @@ function NCM.OnReady()
 	_G.NonComposMentisDB.opts	= _G.NonComposMentisDB.opts or {};
 	_G.NonComposMentisDB.farms	= _G.NonComposMentisDB.farms or {};
 
+	NCMOptionsFrame.name = 'Non Compos Mentis';
+	InterfaceOptions_AddCategory(NCMOptionsFrame);
+
 	NCM.StartFrame();
+end
+
+function NCM.ShowOptions()
+
+	InterfaceOptionsFrame_OpenToCategory(NCMOptionsFrame.name);
+end
+
+function NCM.OptionClick(button, name)
+
+	if (name == 'hide') then
+		if (_G.NonComposMentisDB.opts.hide) then
+			NCM.Show();
+		else
+			NCM.Hide();
+		end
+	end
+
 end
 
 function NCM.OnSaving()
@@ -86,26 +106,31 @@ function NCM.StartFrame()
 
 	if (_G.NonComposMentisDB.opts.hide) then
 		NCM.UIFrame:Hide();
+		NCMOptionsFrameCheck1:SetChecked(false);
 	else
 		NCM.UIFrame:Show();
+		NCMOptionsFrameCheck1:SetChecked(true);
 	end
 end
 
 function NCM.Show()
 	_G.NonComposMentisDB.opts.hide = false;
 	NCM.UIFrame:Show();
+	NCMOptionsFrameCheck1:SetChecked(true);
 	print("Non Compos Mentis: Visible");
 end
 
 function NCM.Hide()
 	_G.NonComposMentisDB.opts.hide = true;
 	NCM.UIFrame:Hide();
+	NCMOptionsFrameCheck1:SetChecked(false);
 	print("Non Compos Mentis: Hidden");
 end
 
 function NCM.HideButton()
 	_G.NonComposMentisDB.opts.hide = true;
 	NCM.UIFrame:Hide();
+	NCMOptionsFrameCheck1:SetChecked(false);
 	print("Non Compos Mentis: Hidden");
 	print("    Use \"/ncm show\" to show again");
 end
@@ -581,14 +606,16 @@ function SlashCmdList.NONCOMPOSMENTIS(msg, editbox)
 		NCM.Toggle();
 	elseif (msg == 'reset') then
 		NCM.ResetPos();
-	elseif (msg == 'test') then
+	elseif (msg == 'test') then 
 		NCM.Test();
+	elseif (msg == 'opts' or msg == 'options') then 
+		NCM.ShowOptions();
 	else
 		print "Non Compos Mentis commands:";
-		print "   /ncm show - Show frame";
-		print "   /ncm hide - Hide frame";
-		print "   /ncm toggle - Toggle frame";
+		print "   /ncm show - Show addon";
+		print "   /ncm hide - Hide addon";
 		print "   /ncm reset - Reset frame position and size";
+		print "   /ncm opts - Show options";
 	end
 end
 

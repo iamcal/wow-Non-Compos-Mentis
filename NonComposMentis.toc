@@ -7,3 +7,4 @@
 ## SavedVariablesPerCharacter: NonComposMentisDB
 NonComposMentis.lua
 NonComposMentis.xml
+NonComposMentis_Options.xml

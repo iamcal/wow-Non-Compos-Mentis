@@ -11,3 +11,4 @@
  - show some goblin factions
  - show how many quests remain for shen'dralar
  - bring back the close button
+ - added options panel
