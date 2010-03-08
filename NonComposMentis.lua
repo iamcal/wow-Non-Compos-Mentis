@@ -180,16 +180,17 @@ function NCM.UpdateFrame()
 
 	if (NCM.reps_loaded) then
 
-
 		for k,v in pairs(reps) do
 
 			local old_v = NCM.prev_reps[k];
-			if (not (v == old_v)) then
-				diffs[k] = v - old_v;
-				has_diffs = true;
+			if (old_v) then
+				if (not (v == old_v)) then
+					diffs[k] = v - old_v;
+					has_diffs = true;
 
-				NCM.has_session_data = true;
-				NCM.play_session[k] = (NCM.play_session[k] or 0) + diffs[k];
+					NCM.has_session_data = true;
+					NCM.play_session[k] = (NCM.play_session[k] or 0) + diffs[k];
+				end
 			end
 		end
 
