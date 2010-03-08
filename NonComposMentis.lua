@@ -300,6 +300,9 @@ function NCM.UpdateFrame()
 	else
 		txt = txt .. "Shen'dralar\n";
 		txt = txt .. indent .. NCM.FormatNumber(sd_remain) .. " rep remaining\n";
+
+		local sd_quests = math.ceil(sd_remain / (500 * factor));
+		txt = txt .. indent .. "Quest turnins to finish: " .. sd_quests .. "\n";
 	end
 	txt = txt .. "\n";
 
