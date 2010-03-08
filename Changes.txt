@@ -9,3 +9,4 @@
  - show how long left to kill required ravenholdt members
  - fixed first load for character not finding reputations
  - show some goblin factions
+ - show how many quests remain for shen'dralar
