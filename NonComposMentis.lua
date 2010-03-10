@@ -271,8 +271,8 @@ function NCM.UpdateFrame()
 		txt = txt .. indent .. NCM.FormatNumber(rh_remain) .. " rep remaining\n";
 
 		-- can we still kill members?
-		if (rh < 21000) then
-			local rh_remain_kill = 21000 - rh;
+		if (rh < 20999) then
+			local rh_remain_kill = 20999 - rh;
 			local rh_kills = math.ceil(rh_remain_kill / (5 * factor));
 			txt = txt .. indent .. "Kills until Revered: " .. rh_kills .. "\n";
 
