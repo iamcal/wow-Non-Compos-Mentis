@@ -16,3 +16,5 @@
 1.3
  - don't allow the edit box to get focus
  - stop showing syndicate kills at 11999/12000
+ - track bloodsail buccaneer kills
+ - track kills correctly, ignoring other sources of rep (inc. for humans)
