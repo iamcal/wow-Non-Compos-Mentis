@@ -205,6 +205,18 @@ function NCM.UpdateFrame()
 
 
 	--
+	-- bonuses for humans
+	--
+
+	local race = UnitRace("player");
+	local factor = 1;
+
+	if (race == 'Human') then
+		factor = 1.1;
+	end
+
+
+	--
 	-- see what's changed since last update
 	--
 
@@ -233,7 +245,8 @@ function NCM.UpdateFrame()
 
 	NCM.prev_reps = reps;
 
-	if (diffs['Ravenholdt']) then NCM.IncrementSession('Ravenholdt', diffs['Ravenholdt']); end
+	NCM.CheckDiffsAndIncrement(diffs['Ravenholdt'], 'Ravenholdt', 5 * factor);
+	NCM.CheckDiffsAndIncrement(diffs['Bloodsail Buccaneers'], 'Bloodsail Buccaneers', 25 * factor);
 
 	if (NCM.has_session_data and false) then
 
@@ -242,18 +255,6 @@ function NCM.UpdateFrame()
 			txt = txt .. indent .. k .. ": " .. v .. "\n";
 		end
 		txt = txt .. "\n";
-	end
-
-
-	--
-	-- bonuses for humans
-	--
-
-	local race = UnitRace("player");
-	local factor = 1;
-
-	if (race == 'Human') then
-		factor = 1.1;
 	end
 
 
@@ -291,6 +292,38 @@ function NCM.UpdateFrame()
 		-- junk box turnins
 		local rh_boxes = math.ceil(rh_remain / (75 * factor)) * 5;
 		txt = txt .. indent .. "Junk boxes to finish: " .. rh_boxes .. "\n";
+	end
+	txt = txt .. "\n";
+
+
+	--
+	-- Bloodsail Buccaneers
+	--
+
+	-- new default is 35500/36000 hostile, which is 6500 below 0/3000 neutral
+
+	local bb = reps["Bloodsail Buccaneers"] or -6500;
+	local bb_remain = 9000 - bb;
+	if (bb_remain < 1) then
+
+		txt = txt .. "Bloodsail Buccaneers: DONE!\n";
+	else
+		txt = txt .. "Bloodsail Buccaneers\n";
+		txt = txt .. indent .. NCM.FormatNumber(bb_remain) .. " rep remaining\n";
+
+		local bb_bruisers = math.ceil(bb_remain / (25 * factor));
+		txt = txt .. indent .. "Bruiser kills to finish: " .. bb_bruisers .. "\n";
+
+		if (NCM.GetSessionLength('Bloodsail Buccaneers') > 0) then
+			local len = NCM.GetSessionLength('Bloodsail Buccaneers');
+			local delta = NCM.GetSessionDelta('Bloodsail Buccaneers');
+
+			delta = math.floor(delta / (25 * factor));
+			local len_remain = (len / delta) * bb_bruisers;
+
+			txt = txt .. indent .. indent .. ""..delta.." in "..NCM.FormatTime(len, "0s").." => "
+				..NCM.FormatTime(len_remain, "0s").." remaining\n";
+		end
 	end
 	txt = txt .. "\n";
 
@@ -340,26 +373,6 @@ function NCM.UpdateFrame()
 	end
 	txt = txt .. "\n";
 
-
-	--
-	-- Bloodsail Buccaneers
-	--
-
-	-- new default is 35500/36000 hostile, which is 6500 below 0/3000 neutral
-
-	local bb = reps["Bloodsail Buccaneers"] or -6500;
-	local bb_remain = 9000 - bb;
-	if (bb_remain < 1) then
-
-		txt = txt .. "Bloodsail Buccaneers: DONE!\n";
-	else
-		txt = txt .. "Bloodsail Buccaneers\n";
-		txt = txt .. indent .. NCM.FormatNumber(bb_remain) .. " rep remaining\n";
-
-		local bb_bruisers = math.ceil(bb_remain / (25 * factor));
-		txt = txt .. indent .. "Bruiser kills to finish: " .. bb_bruisers .. "\n";
-	end
-	txt = txt .. "\n";
 
 
 	--
@@ -425,6 +438,20 @@ function NCM.UpdateFrame()
 	end
 
 	_G.NCMFrameScrollFrameText:SetText(txt);
+end
+
+
+function NCM.CheckDiffsAndIncrement(diff, name, value)
+
+	local lo = math.floor(value);
+	local hi = math.ceil(value);
+
+	if (lo == diff) then
+		NCM.IncrementSession(name, diff);
+	end
+	if (lo ~= hi and hi == diff) then
+		NCM.IncrementSession(name, diff);
+	end
 end
 
 ---------------------------------------------------------------------------------------------
