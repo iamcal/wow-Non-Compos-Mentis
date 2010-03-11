@@ -178,6 +178,21 @@ function NCM.FormatNumberShort(n)
 	return s;
 end
 
+function NCM.FormatPercent(p)
+
+	if (p == 0) then
+		return "0%";
+	end
+
+	local x = string.format("%.1f", p)
+
+	if (x == "0.0" or x == "99.9") then x = string.format("%.2f", p) end;
+	if (x == "0.00" or x == "99.99") then x = string.format("%.3f", p) end;
+	if (x == "0.000" or x == "99.999") then x = string.format("%.4f", p) end;
+
+	return x .. '%';
+end
+
 function NCM.UpdateFrame()
 
 	NCM.TryEndSession();
@@ -283,9 +298,11 @@ function NCM.UpdateFrame()
 
 				delta = math.floor(delta / (5 * factor));
 				local len_remain = (len / delta) * rh_kills;
+				local rh_percent = 100 * delta / (delta + rh_kills);
 
 				txt = txt .. indent .. indent .. ""..delta.." in "..NCM.FormatTime(len, "0s").." => "
-					..NCM.FormatTime(len_remain, "0s").." remaining\n";
+					..NCM.FormatTime(len_remain, "0s").." to go\n";
+				txt = txt .. indent .. indent .. NCM.FormatPercent(rh_percent) .. " complete\n"
 			end
 		end
 
@@ -320,9 +337,11 @@ function NCM.UpdateFrame()
 
 			delta = math.floor(delta / (25 * factor));
 			local len_remain = (len / delta) * bb_bruisers;
+			local bb_percent = 100 * delta / (delta + bb_bruisers);
 
 			txt = txt .. indent .. indent .. ""..delta.." in "..NCM.FormatTime(len, "0s").." => "
-				..NCM.FormatTime(len_remain, "0s").." remaining\n";
+				..NCM.FormatTime(len_remain, "0s").." to go\n";
+			txt = txt .. indent .. indent .. NCM.FormatPercent(bb_percent) .. " complete\n"
 		end
 	end
 	txt = txt .. "\n";

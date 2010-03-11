@@ -18,3 +18,4 @@
  - stop showing syndicate kills at 11999/12000
  - track bloodsail buccaneer kills
  - track kills correctly, ignoring other sources of rep (inc. for humans)
+ - show percentage completion for kill tasks
