@@ -263,6 +263,12 @@ function NCM.UpdateFrame()
 	NCM.CheckDiffsAndIncrement(diffs['Ravenholdt'], 'Ravenholdt', 5 * factor);
 	NCM.CheckDiffsAndIncrement(diffs['Bloodsail Buccaneers'], 'Bloodsail Buccaneers', 25 * factor);
 
+	if (GetRealZoneText() == 'Dire Maul') then
+		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'free-knot', 350 * factor);
+		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'ogre-suit', 250 * factor);
+		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'ogre-suit', 75 * factor);
+	end
+
 	if (NCM.has_session_data and false) then
 
 		txt = txt .. "Changes this session:\n";
@@ -347,6 +353,54 @@ function NCM.UpdateFrame()
 	txt = txt .. "\n";
 
 
+
+	--
+	-- Goblin Factions
+	--
+
+	local g1 = reps["Booty Bay"] or 0;
+	local g2 = reps["Everlook"] or 0;
+	local g3 = reps["Gadgetzan"] or 0;
+	local g4 = reps["Ratchet"] or 0;
+
+	local g1_remain = 42000 - g1;
+	local g2_remain = 42000 - g2;
+	local g3_remain = 42000 - g3;
+	local g4_remain = 42000 - g4;
+
+	local most_remain = 0;
+	if (g1_remain > most_remain) then most_remain = g1_remain; end
+	if (g2_remain > most_remain) then most_remain = g2_remain; end
+	if (g3_remain > most_remain) then most_remain = g3_remain; end
+	if (g4_remain > most_remain) then most_remain = g4_remain; end
+
+	if (most_remain < 1) then
+
+		txt = txt .. "Goblin Factions: DONE!\n";
+	else
+		txt = txt .. "Goblin Factions\n";
+		txt = txt .. indent .. NCM.FormatNumber(most_remain) .. " rep remaining\n";
+		txt = txt .. indent .. indent .. "(" .. NCM.FormatNumberShort(g1_remain) .. "/" .. NCM.FormatNumberShort(g2_remain) .. "/" 
+			.. NCM.FormatNumberShort(g3_remain) .. "/" .. NCM.FormatNumberShort(g4_remain) .. ")\n";
+
+		local g_knot = math.ceil(most_remain / (350 * factor));
+		local g_ogre = math.ceil(most_remain / (250 * factor));
+		
+		txt = txt .. indent .. "Free Knot turnins to finish: " .. g_knot .. "\n";
+		if (NCM.GetSessionDelta('free-knot') > 0) then
+			txt = txt .. indent .. indent .. "Done: " .. NCM.GetSessionDelta('free-knot') .. "\n";
+		end
+
+		txt = txt .. indent .. "Orge Tannin turnins to finish: " .. g_ogre .. "\n";
+		if (NCM.GetSessionDelta('ogre-suit') > 0) then
+			txt = txt .. indent .. indent .. "Done: " .. NCM.GetSessionDelta('ogre-suit') .. "\n";
+		end
+
+	end
+	txt = txt .. "\n";
+
+
+
 	--
 	-- Darkmoon Faire
 	--
@@ -393,47 +447,6 @@ function NCM.UpdateFrame()
 	txt = txt .. "\n";
 
 
-
-	--
-	-- Goblin Factions
-	--
-
-	local g1 = reps["Booty Bay"] or 0;
-	local g2 = reps["Everlook"] or 0;
-	local g3 = reps["Gadgetzan"] or 0;
-	local g4 = reps["Ratchet"] or 0;
-
-	local g1_remain = 42000 - g1;
-	local g2_remain = 42000 - g2;
-	local g3_remain = 42000 - g3;
-	local g4_remain = 42000 - g4;
-
-	local most_remain = 0;
-	if (g1_remain > most_remain) then most_remain = g1_remain; end
-	if (g2_remain > most_remain) then most_remain = g2_remain; end
-	if (g3_remain > most_remain) then most_remain = g3_remain; end
-	if (g4_remain > most_remain) then most_remain = g4_remain; end
-
-	if (most_remain < 1) then
-
-		txt = txt .. "Goblin Factions: DONE!\n";
-	else
-		txt = txt .. "Goblin Factions\n";
-		txt = txt .. indent .. NCM.FormatNumber(most_remain) .. " rep remaining\n";
-		txt = txt .. indent .. indent .. "(" .. NCM.FormatNumberShort(g1_remain) .. "/" .. NCM.FormatNumberShort(g2_remain) .. "/" 
-			.. NCM.FormatNumberShort(g3_remain) .. "/" .. NCM.FormatNumberShort(g4_remain) .. ")\n";
-
-		local g_knot = math.ceil(most_remain / (350 * factor));
-		local g_ogre = math.ceil(most_remain / (250 * factor));
-		
-		txt = txt .. indent .. "Free Knot turnins to finish: " .. g_knot .. "\n";
-		txt = txt .. indent .. "Orge Tannin turnins to finish: " .. g_ogre .. "\n";
-
-	end
-
-
-
-
 	
 
 	if (false) then
@@ -470,6 +483,19 @@ function NCM.CheckDiffsAndIncrement(diff, name, value)
 	end
 	if (lo ~= hi and hi == diff) then
 		NCM.IncrementSession(name, diff);
+	end
+end
+
+function NCM.CheckDiffsAndIncrementCount(diff, name, value)
+
+	local lo = math.floor(value);
+	local hi = math.ceil(value);
+
+	if (lo == diff) then
+		NCM.IncrementSession(name, 1);
+	end
+	if (lo ~= hi and hi == diff) then
+		NCM.IncrementSession(name, 1);
 	end
 end
 

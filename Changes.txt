@@ -19,3 +19,5 @@
  - track bloodsail buccaneer kills
  - track kills correctly, ignoring other sources of rep (inc. for humans)
  - show percentage completion for kill tasks
+ - count and show number of Orge Suit and Free Knot turnins
+ - show goblins after buccaneers (the order you tend to do it in)
