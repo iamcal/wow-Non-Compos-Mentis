@@ -17,6 +17,10 @@ function NCM.OnLoad()
 	NCM.farm_started = nil;
 	NCM.farm_last = nil;
 	NCM.farm_delta = nil;
+
+	-- dire maul time
+	NCM.dm_started = nil;
+	NCM.dm_inside = 0;
 end
 
 function NCM.OnReady()
@@ -29,6 +33,7 @@ function NCM.OnReady()
 	NCMOptionsFrame.name = 'Non Compos Mentis';
 	InterfaceOptions_AddCategory(NCMOptionsFrame);
 
+	NCM.NewZone();
 	NCM.StartFrame();
 end
 
@@ -51,6 +56,7 @@ end
 
 function NCM.OnSaving()
 
+	NCM.EndDMTimer();
 	NCM.EndSession();
 
 	local point, relativeTo, relativePoint, xOfs, yOfs = NCM.UIFrame:GetPoint()
@@ -75,15 +81,6 @@ function NCM.OnEvent(frame, event, ...)
 		NCM.OnSaving();
 	end
 
-	if (event == 'PLAYER_TARGET_CHANGED') then
-	end
-
-	if (event == 'LOOT_OPENED') then
-	end
-
-	if (event == 'LOOT_CLOSED') then
-	end
-
 	if (event == 'PLAYER_ALIVE') then
 		NCM.UpdateFrame();
 	end	
@@ -91,7 +88,80 @@ function NCM.OnEvent(frame, event, ...)
 	if (event == 'CHAT_MSG_COMBAT_FACTION_CHANGE') then
 		NCM.UpdateFrame();
 	end
+
+	if (event == 'ZONE_CHANGED_NEW_AREA') then
+		NCM.NewZone();
+	end
+
+	if (event == 'PLAYER_TARGET_CHANGED') then
+		NCM.NewTarget();
+	end
 end
+
+function NCM.NewZone()
+
+	if (NCM.IsInDireMaul()) then
+
+		NCM.StartDMTimer();
+		NCM.UpdateFrame();
+	else
+		NCM.EndDMTimer();
+		NCM.UpdateFrame();
+	end
+end
+
+function NCM.StartDMTimer()
+
+	if (NCM.dm_inside == 0) then
+
+		NCM.dm_inside = 1;
+		NCM.dm_started = GetTime();
+	end
+end
+
+function NCM.EndDMTimer()
+
+	if (NCM.dm_inside == 1) then
+
+		NCM.dm_inside = 0;
+		NCM.IncrementSimpleCounter('dm-time', GetTime() - NCM.dm_started);
+		NCM.UpdateFrame();
+	end
+end
+
+function NCM.IsInDireMaul()
+
+	if (GetRealZoneText() == 'Dire Maul') then
+		return true;
+	else
+		return false;
+	end
+end
+
+function NCM.NewTarget()
+
+	local guid = UnitGUID("target");
+
+	if (guid) then
+
+		local type = tonumber(guid:sub(5,5), 16) % 8;
+
+		if (type == 3) then
+			local uid = tonumber(guid:sub(9,12), 16);
+			local spawn = guid:sub(13,18);
+
+			if (uid == 14338) then
+				if (not (spawn == _G.NonComposMentisDB.last_knot)) then
+
+					_G.NonComposMentisDB.last_knot = spawn;
+					NCM.IncrementSimpleCounter('dm-knots', 1);
+					NCM.UpdateFrame();
+				end
+			end
+		end
+	end
+end
+
 
 function NCM.OnUpdate()
 
@@ -263,7 +333,7 @@ function NCM.UpdateFrame()
 	NCM.CheckDiffsAndIncrement(diffs['Ravenholdt'], 'Ravenholdt', 5 * factor);
 	NCM.CheckDiffsAndIncrement(diffs['Bloodsail Buccaneers'], 'Bloodsail Buccaneers', 25 * factor);
 
-	if (GetRealZoneText() == 'Dire Maul') then
+	if (NCM.IsInDireMaul()) then
 		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'free-knot', 350 * factor);
 		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'ogre-suit', 250 * factor);
 		NCM.CheckDiffsAndIncrementCount(diffs['Booty Bay'], 'ogre-suit', 75 * factor);
@@ -384,7 +454,8 @@ function NCM.UpdateFrame()
 			.. NCM.FormatNumberShort(g3_remain) .. "/" .. NCM.FormatNumberShort(g4_remain) .. ")\n";
 
 		local g_knot = math.ceil(most_remain / (350 * factor));
-		local g_ogre = math.ceil(most_remain / (250 * factor));
+		local g_ogre = math.ceil(most_remain / (75 * factor));
+		local g_both = math.ceil(most_remain / (425 * factor));
 		
 		txt = txt .. indent .. "Free Knot turnins to finish: " .. g_knot .. "\n";
 		if (NCM.GetSessionDelta('free-knot') > 0) then
@@ -395,6 +466,9 @@ function NCM.UpdateFrame()
 		if (NCM.GetSessionDelta('ogre-suit') > 0) then
 			txt = txt .. indent .. indent .. "Done: " .. NCM.GetSessionDelta('ogre-suit') .. "\n";
 		end
+		txt = txt .. indent .. "Suit+Key runs to finish: " .. g_both .. "\n";
+		txt = txt .. indent .. "Time spent in DM: " .. NCM.FormatTime(NCM.GetSimpleCounter('dm-time'), "None") .. "\n";
+		txt = txt .. indent .. "Knots encountered: " .. NCM.GetSimpleCounter('dm-knots') .. "\n";
 
 	end
 	txt = txt .. "\n";
@@ -608,6 +682,17 @@ function NCM.EndSession()
 	NCM.UpdateFrame();
 end
 
+function NCM.GetSimpleCounter(name)
+
+	return _G.NonComposMentisDB.farms[name] or 0;
+end
+
+function NCM.IncrementSimpleCounter(name, delta)
+
+	_G.NonComposMentisDB.farms[name] = _G.NonComposMentisDB.farms[name] or 0;
+	_G.NonComposMentisDB.farms[name] = _G.NonComposMentisDB.farms[name] + delta;
+end
+
 ---------------------------------------------------------------------------------------------
 
 function NCM.FormatTime(t, zero)
@@ -703,5 +788,6 @@ NCM.Frame:RegisterEvent("LOOT_CLOSED")
 NCM.Frame:RegisterEvent("PLAYER_LOGOUT")
 NCM.Frame:RegisterEvent("PLAYER_ALIVE")
 NCM.Frame:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
+NCM.Frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 NCM.OnLoad()

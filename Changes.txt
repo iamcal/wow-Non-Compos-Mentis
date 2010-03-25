@@ -21,3 +21,7 @@
  - show percentage completion for kill tasks
  - count and show number of Orge Suit and Free Knot turnins
  - show goblins after buccaneers (the order you tend to do it in)
+ - corrected rep from ogre-suit turnins
+ - show remain key+suit runs
+ - show time spent in DM
+ - show number of Knot spawns encountered (best estimation of number of DM runs)
