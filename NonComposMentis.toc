@@ -2,7 +2,7 @@
 ## Title : Non Compos Mentis
 ## Notes: Track your progress towards insanity.
 ## Author: Cal Henderson (Bees on Hyjal-US)
-## Version: 1.3
+## Version: 1.4
 ## Dependencies: 
 ## SavedVariablesPerCharacter: NonComposMentisDB
 NonComposMentis.lua
